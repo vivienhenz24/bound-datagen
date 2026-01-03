@@ -2,4 +2,6 @@ services:
   app:
     build: .
     container_name: bound-datagen
+    stdin_open: true
+    tty: true
 

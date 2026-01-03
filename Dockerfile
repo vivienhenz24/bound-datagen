@@ -1,12 +1,13 @@
 # Use Python 3.12 slim image as base
 FROM python:3.12-slim
 
-# Install build dependencies for Rust
+# Install build dependencies for Rust and git
 RUN apt-get update && apt-get install -y \
     curl \
     build-essential \
     pkg-config \
     libssl-dev \
+    git \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Rust toolchain (version will be set by rust-toolchain.toml)
@@ -36,6 +37,9 @@ WORKDIR /app
 # Copy project files
 COPY pyproject.toml ./
 COPY datagen/ ./datagen/
+
+# Ensure workspace directory exists
+RUN mkdir -p /app/workspace
 
 # Install dependencies using uv
 RUN uv sync --no-dev

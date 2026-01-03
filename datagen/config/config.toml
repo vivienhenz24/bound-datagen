@@ -1,0 +1,4 @@
+[repositories]
+svix = "https://github.com/svix/svix-webhooks/"
+axum = "https://github.com/tokio-rs/axum"
+

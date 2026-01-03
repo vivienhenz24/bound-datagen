@@ -6,11 +6,20 @@ import sys
 
 
 def main():
-    """Build and run the Docker container."""
+    """Build and run the Docker container with interactive repository selection."""
     try:
-        # Build and run using docker-compose
+        # Build the Docker image first
+        print("Building Docker image...")
         subprocess.run(
-            ["docker-compose", "up", "--build"],
+            ["docker-compose", "build"],
+            check=True
+        )
+        
+        # Run the container interactively with the repo selector
+        print("\nStarting container...")
+        print("You will be prompted to select a repository to clone.\n")
+        subprocess.run(
+            ["docker-compose", "run", "--rm", "app", "python", "-m", "datagen.repo_selector"],
             check=True
         )
     except subprocess.CalledProcessError as e:
