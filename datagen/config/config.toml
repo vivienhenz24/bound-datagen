@@ -1,4 +1,6 @@
 [repositories]
-svix = "https://github.com/svix/svix-webhooks/"
-axum = "https://github.com/tokio-rs/axum"
+typed-racket = "https://github.com/racket/typed-racket"
+syntax-spec = "https://github.com/michaelballantyne/syntax-spec"
+pie = "https://github.com/the-little-typer/pie"
+syntax-parse-example = "https://github.com/syntax-objects/syntax-parse-example"
 

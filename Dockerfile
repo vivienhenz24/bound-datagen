@@ -27,15 +27,13 @@ COPY codex-rs/Cargo.toml codex-rs/Cargo.lock codex-rs/rust-toolchain.toml ./code
 # Now copy the rest of the codex-rs source code
 COPY codex-rs/ ./codex-rs/
 
-# Build codex-exec binary with cache mounts
+# Build codex-exec binary with cache mounts and copy it in the same step
 WORKDIR /app/codex-rs
 RUN --mount=type=cache,target=/root/.cargo/registry \
     --mount=type=cache,target=/root/.cargo/git \
     --mount=type=cache,target=/app/codex-rs/target \
-    cargo build --release -p codex-exec
-
-# Copy the built binary to /usr/local/bin
-RUN cp target/release/codex-exec /usr/local/bin/codex-exec && \
+    cargo build --release -p codex-exec && \
+    cp target/release/codex-exec /usr/local/bin/codex-exec && \
     chmod +x /usr/local/bin/codex-exec
 
 # Return to app directory
