@@ -20,12 +20,19 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 # Set working directory
 WORKDIR /app
 
-# Copy codex-rs directory for building codex-exec
+# Copy only Cargo files first for better layer caching
+# This allows Docker to cache the dependency download layer separately
+COPY codex-rs/Cargo.toml codex-rs/Cargo.lock codex-rs/rust-toolchain.toml ./codex-rs/
+
+# Now copy the rest of the codex-rs source code
 COPY codex-rs/ ./codex-rs/
 
-# Build codex-exec binary
+# Build codex-exec binary with cache mounts
 WORKDIR /app/codex-rs
-RUN cargo build --release -p codex-exec
+RUN --mount=type=cache,target=/root/.cargo/registry \
+    --mount=type=cache,target=/root/.cargo/git \
+    --mount=type=cache,target=/app/codex-rs/target \
+    cargo build --release -p codex-exec
 
 # Copy the built binary to /usr/local/bin
 RUN cp target/release/codex-exec /usr/local/bin/codex-exec && \
