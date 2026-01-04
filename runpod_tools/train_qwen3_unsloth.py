@@ -67,7 +67,16 @@ def main() -> None:
     parser.add_argument("--batch-size", type=int, default=2, help="Per-device batch size.")
     parser.add_argument("--grad-accum", type=int, default=8, help="Gradient accumulation steps.")
     parser.add_argument("--epochs", type=int, default=1, help="Training epochs.")
+    parser.add_argument(
+        "--max-steps",
+        type=int,
+        default=0,
+        help="Override total training steps (takes precedence over epochs if > 0).",
+    )
     parser.add_argument("--learning-rate", type=float, default=2e-4, help="Learning rate.")
+    parser.add_argument("--logging-steps", type=int, default=10, help="Logging interval in steps.")
+    parser.add_argument("--save-steps", type=int, default=200, help="Checkpoint save interval in steps.")
+    parser.add_argument("--warmup-steps", type=int, default=20, help="Warmup steps.")
     parser.add_argument("--debug", action="store_true", help="Enable verbose logging.")
     args = parser.parse_args()
 
@@ -130,14 +139,15 @@ def main() -> None:
         per_device_train_batch_size=args.batch_size,
         gradient_accumulation_steps=args.grad_accum,
         num_train_epochs=args.epochs,
+        max_steps=args.max_steps if args.max_steps > 0 else -1,
         learning_rate=args.learning_rate,
-        logging_steps=10,
-        save_steps=200,
+        logging_steps=args.logging_steps,
+        save_steps=args.save_steps,
         save_total_limit=2,
         bf16=True,
         fp16=False,
         optim="adamw_8bit",
-        warmup_steps=20,
+        warmup_steps=args.warmup_steps,
         weight_decay=0.01,
         lr_scheduler_type="linear",
         report_to=[],
