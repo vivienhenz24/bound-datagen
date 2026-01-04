@@ -31,5 +31,5 @@ nvidia-smi -L || true
 echo "[runpod] Launching training..."
 "$PYTHON_BIN" runpod_tools/train_qwen3_unsloth.py \
   --data finetune-data.jsonl \
-  --output-dir output/qwen3-1.5b-unsloth \
+  --output-dir output/qwen3-1.7b-unsloth \
   --debug

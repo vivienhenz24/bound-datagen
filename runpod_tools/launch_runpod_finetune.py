@@ -271,7 +271,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="Launch Runpod fine-tuning for Qwen3-1.5B with Unsloth."
     )
-    parser.add_argument("--pod-name", default="qwen3-1.5b-finetune", help="Pod name.")
+    parser.add_argument("--pod-name", default="qwen3-1.7b-finetune", help="Pod name.")
     parser.add_argument("--gpu-type", default="RTX 5090", help="GPU type id or name.")
     parser.add_argument(
         "--image",
@@ -294,7 +294,7 @@ def main() -> None:
     )
     parser.add_argument(
         "--local-output",
-        default="finetuned_models/qwen3-1.5b-unsloth",
+        default="finetuned_models/qwen3-1.7b-unsloth",
         help="Local output directory for artifacts.",
     )
     parser.add_argument("--ssh-user", default="root", help="SSH username.")
@@ -485,7 +485,7 @@ def main() -> None:
             "--progress",
             "-e",
             f"ssh -p {port} -o StrictHostKeyChecking=no",
-            f"{ssh_user}@{host}:{remote_base}/output/qwen3-1.5b-unsloth/",
+            f"{ssh_user}@{host}:{remote_base}/output/qwen3-1.7b-unsloth/",
             str(local_output) + "/",
         ],
         debug=args.debug,

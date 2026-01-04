@@ -55,14 +55,14 @@ def format_chat_dataset(dataset, tokenizer, max_seq_length: int):
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Fine-tune Qwen3-1.5B with Unsloth.")
+    parser = argparse.ArgumentParser(description="Fine-tune Qwen3 with Unsloth.")
     parser.add_argument("--data", default="finetune-data.jsonl", help="Path to JSONL dataset.")
     parser.add_argument(
         "--model",
-        default="unsloth/Qwen3-1.5B",
-        help="Hugging Face model id for Qwen3 1.5B.",
+        default="Qwen/Qwen3-1.7B",
+        help="Hugging Face model id for Qwen3.",
     )
-    parser.add_argument("--output-dir", default="output/qwen3-1.5b-unsloth", help="Output directory.")
+    parser.add_argument("--output-dir", default="output/qwen3-1.7b-unsloth", help="Output directory.")
     parser.add_argument("--max-seq-length", type=int, default=2048, help="Max sequence length.")
     parser.add_argument("--batch-size", type=int, default=2, help="Per-device batch size.")
     parser.add_argument("--grad-accum", type=int, default=8, help="Gradient accumulation steps.")

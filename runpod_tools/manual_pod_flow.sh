@@ -13,7 +13,7 @@ SSH_HOST="${SSH_HOST:-}"
 SSH_PORT="${SSH_PORT:-22}"
 SSH_USER="${SSH_USER:-root}"
 REMOTE_BASE="${REMOTE_BASE:-/workspace/bound-datagen}"
-LOCAL_OUTPUT="${LOCAL_OUTPUT:-finetuned_models/qwen3-1.5b-unsloth}"
+LOCAL_OUTPUT="${LOCAL_OUTPUT:-finetuned_models/qwen3-1.7b-unsloth}"
 
 if [[ -z "$SSH_HOST" ]]; then
   echo "SSH_HOST is required."
@@ -35,7 +35,7 @@ echo "[manual] Starting remote training..."
 echo "[manual] Pulling artifacts..."
 mkdir -p "${LOCAL_OUTPUT}"
 rsync -avv --progress -e "${RSYNC_SSH[*]}" \
-  "${SSH_USER}@${SSH_HOST}:${REMOTE_BASE}/output/qwen3-1.5b-unsloth/" \
+  "${SSH_USER}@${SSH_HOST}:${REMOTE_BASE}/output/qwen3-1.7b-unsloth/" \
   "${LOCAL_OUTPUT}/"
 
 echo "[manual] Done. Artifacts in ${LOCAL_OUTPUT}"
