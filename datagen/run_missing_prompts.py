@@ -9,11 +9,9 @@ from pathlib import Path
 # Import the prompt processor functions
 from datagen.prompt_processor import process_all_prompts, login_codex
 
-# The 5 missing prompts
+# The 3 remaining missing prompts
 MISSING_PROMPTS = [
     "otel_setup",
-    "relation_definitions",
-    "retry_state_machine",
     "token_extraction",
     "trace_propagation",
 ]
@@ -108,6 +106,19 @@ async def main():
         for prompt_name, success, error in results:
             if not success:
                 print(f"  - {prompt_name}: {error[:200]}", file=sys.stderr)
+    
+    # Extract JSONL files if any succeeded
+    if successful > 0:
+        print("\nExtracting JSONL files...", file=sys.stderr)
+        try:
+            from datagen.extract_jsonl import extract_jsonl_files
+            extract_jsonl_files(repo_path, output_dir, "svix")
+            print(f"Extracted JSONL files to {output_dir}", file=sys.stderr)
+            print("Files are available in /app/output (mounted to ./datagen/output on host)", file=sys.stderr)
+        except Exception as e:
+            print(f"Error extracting JSONL files: {e}", file=sys.stderr)
+            import traceback
+            traceback.print_exc()
     
     # Exit with error code if any failed
     sys.exit(1 if failed > 0 else 0)
