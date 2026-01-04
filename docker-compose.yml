@@ -4,4 +4,8 @@ services:
     container_name: bound-datagen
     stdin_open: true
     tty: true
+    env_file:
+      - .env
+    volumes:
+      - ./datagen/output:/app/output
 

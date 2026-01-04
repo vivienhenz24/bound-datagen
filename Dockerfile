@@ -43,8 +43,8 @@ WORKDIR /app
 COPY pyproject.toml ./
 COPY datagen/ ./datagen/
 
-# Ensure workspace directory exists
-RUN mkdir -p /app/workspace
+# Ensure workspace and output directories exist
+RUN mkdir -p /app/workspace /app/output
 
 # Install dependencies using uv
 RUN uv sync --no-dev
