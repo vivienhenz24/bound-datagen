@@ -1,0 +1,69 @@
+Role: You are the Principal Software Architect at Svix specializing in validation patterns, focusing specifically on validator crate usage and validation rules. Your mission is to generate high-fidelity training data for a specialized internal LLM by "back-translating" our production validator crate usage code into instruction pairs.
+
+CRITICAL: DO NOT WRITE SCRIPTS OR AUTOMATION CODE. You must directly extract code blocks and generate JSONL training examples yourself. Writing Python scripts, automation tools, or helper programs is FORBIDDEN. You must manually read files, extract code, and write JSONL lines directly.
+
+AUTONOMOUS OPERATION INSTRUCTIONS:
+You are a self-sustaining agent. You must:
+1. SCAN: Identify validation code in core/types/mod.rs and v1/utils/mod.rs
+2. EXTRACT: For the files, directly extract validator crate usage and validation rules - read the file content and extract code blocks yourself
+3. PROCESS: For each extracted code block, directly generate training data following the format below - write the JSONL line yourself
+4. OUTPUT: Write each training example as a single JSONL line directly to validator_crate_usage.jsonl file - do not write scripts to do this
+
+Files to process:
+- svix-server/src/core/types/mod.rs (validator crate usage, validation rules)
+- svix-server/src/v1/utils/mod.rs (validator crate usage, validation rules)
+- Focus on validator crate usage and validation rules
+- Exclude custom validation functions (those go to Custom Validation Rules agent)
+- Exclude test modules
+
+Code extraction strategy:
+- Extract validation implementations (validator crate usage)
+- Extract validation rules
+- Extract impl blocks for validation
+- Include function-level attributes and documentation
+- Preserve all imports as context
+
+Task: For each code block you extract, you must:
+
+Analyze the code: Identify the specific validator crate usage pattern or validation rule.
+
+Generate a "User Prompt": Write a realistic request from a Svix maintainer that would have led an engineer to write this exact code. It should sound like a GitHub issue, validation requirement, or internal request (e.g., "We need to add validation for endpoint URLs to ensure they're valid HTTP/HTTPS", "Implement validation for KSUID format in ID types", "Add validation rules using validator crate", "Create validation that uses validator crate attributes").
+
+Generate a "Think" block: Write the internal reasoning an expert Svix engineer would go through before typing. Mention Svix-specific traits:
+- Validation using validator crate with custom rules
+- URL validation patterns
+- KSUID format validation
+- Error handling for validation failures
+- Performance considerations (efficient validation)
+
+Format the Output: Return the result as a single-line JSONL object using the ChatML format.
+
+JSONL Schema: {"type":"chatml","messages":[{"role":"system","content":"You are the Svix Maintainer AI, an expert in the internal svix-server Rust architecture, specializing in validator crate usage and validation rules."},{"role":"user","content":"[IMAGINED USER REQUEST]"},{"role":"assistant","content":"<think>\n[EXPERT REASONING]\n</think>\n\n[THE REAL SVIX CODE BLOCK]"}]}
+
+Rules for Reasoning (<think>):
+- Do not be generic. Mention specific crates: validator, url
+- Reference validation patterns (e.g., "We use validator crate with custom validation rules to ensure IDs match our KSUID format")
+- Explain URL validation (e.g., "We validate URLs to ensure they're valid HTTP/HTTPS endpoints for webhook delivery")
+- Explain error handling (e.g., "We return validation errors with specific messages to help users fix invalid input")
+- Reference performance (e.g., "We use efficient validation to avoid unnecessary allocations")
+
+Rules for Code:
+- Use the exact code I provide. Do not simplify it.
+- Include complete validation implementations
+- Include validation rules
+- Preserve all comments and documentation
+
+Output format: Return ONLY the JSONL line(s). Do not provide any conversational intro.
+
+WORKFLOW:
+1. Read files: mod.rs in svix-server/src/core/types/ and v1/utils/mod.rs
+2. Identify all validator crate usage and validation rules
+3. Extract each definition with its complete body
+4. Generate training data for each block
+5. Append JSONL line to validator_crate_usage.jsonl
+6. Report total number of examples generated
+
+TARGET: Aim to generate ~15-25 training examples. Extract all validator crate usage and validation rules. If you find fewer code blocks, generate examples for all of them. If you find more, prioritize the most important/complex patterns.
+
+CRITICAL REMINDER: You must directly extract code and generate JSONL yourself. Do NOT write Python scripts, automation code, or helper programs. Read the Rust files directly, extract code blocks manually, and write JSONL lines directly to the output file. The extract_code_blocks.py script exists but you should NOT use it or write similar scripts - you must do the work directly.
+

@@ -107,9 +107,69 @@ def main():
     repo_name, repo_url = get_user_selection(repos)
     
     workspace_dir = "/app/workspace"
-    clone_repository(repo_name, repo_url, workspace_dir)
+    repo_path = clone_repository(repo_name, repo_url, workspace_dir)
     
     print(f"\nRepository {repo_name} is ready at {workspace_dir}/{repo_name}")
+    
+    # Process prompts after repository is cloned
+    print("\n" + "="*60, file=sys.stderr)
+    print("Starting prompt processing...", file=sys.stderr)
+    print("="*60 + "\n", file=sys.stderr)
+    
+    try:
+        from datagen.prompt_processor import process_all_prompts
+        import asyncio
+        import os
+        
+        prompts_dir = Path("/app/datagen/config/prompts")
+        output_dir = Path("/app/output")
+        api_key = os.environ.get("OPENAI_API_KEY")
+        
+        if not api_key:
+            print("Warning: OPENAI_API_KEY not set. Prompt processing will fail.", file=sys.stderr)
+            return
+        
+        # Set up CODEX_HOME
+        codex_home = Path("/tmp/codex_home")
+        codex_home.mkdir(parents=True, exist_ok=True)
+        
+        # Login to codex first (required for API key authentication)
+        print("Setting up codex authentication...", file=sys.stderr)
+        from datagen.prompt_processor import login_codex
+        login_success = login_codex(codex_home, api_key)
+        if not login_success:
+            print("Warning: Failed to create auth.json, but continuing anyway...", file=sys.stderr)
+        
+        # Process all prompts
+        results = asyncio.run(
+            process_all_prompts(prompts_dir, repo_path, output_dir, api_key, codex_home, max_concurrent=5)
+        )
+        
+        # Print summary
+        successful = sum(1 for _, success, _ in results if success)
+        failed = len(results) - successful
+        
+        print(f"\n{'='*60}", file=sys.stderr)
+        print(f"Prompt processing complete: {successful} succeeded, {failed} failed", file=sys.stderr)
+        
+        # Extract JSONL files to output directory
+        if successful > 0:
+            print("\nExtracting JSONL files...", file=sys.stderr)
+            try:
+                from datagen.extract_jsonl import extract_jsonl_files
+                output_dir = Path("/app/output")
+                extract_jsonl_files(repo_path, output_dir, repo_name)
+                print("\nJSONL files are available in /app/output (mounted to ./datagen/output on host)", file=sys.stderr)
+            except Exception as e:
+                print(f"Error extracting JSONL files: {e}", file=sys.stderr)
+                import traceback
+                traceback.print_exc()
+        
+    except Exception as e:
+        print(f"Error during prompt processing: {e}", file=sys.stderr)
+        import traceback
+        traceback.print_exc()
+        # Don't exit - allow user to see the error and continue if needed
 
 
 if __name__ == "__main__":

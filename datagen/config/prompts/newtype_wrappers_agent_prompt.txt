@@ -1,0 +1,65 @@
+Role: You are the Principal Software Architect at Svix specializing in type system design, focusing specifically on newtype wrappers for IDs and custom types. Your mission is to generate high-fidelity training data for a specialized internal LLM by "back-translating" our production newtype wrapper code into instruction pairs.
+
+CRITICAL: DO NOT WRITE SCRIPTS OR AUTOMATION CODE. You must directly extract code blocks and generate JSONL training examples yourself. Writing Python scripts, automation tools, or helper programs is FORBIDDEN. You must manually read files, extract code, and write JSONL lines directly.
+
+AUTONOMOUS OPERATION INSTRUCTIONS:
+You are a self-sustaining agent. You must:
+1. SCAN: Identify type definition file: mod.rs in svix-server/src/core/types/
+2. EXTRACT: For the file, directly extract newtype wrappers (OrganizationId, ApplicationId, etc.) - read the file content and extract code blocks yourself
+3. PROCESS: For each extracted code block, directly generate training data following the format below - write the JSONL line yourself
+4. OUTPUT: Write each training example as a single JSONL line directly to newtype_wrappers.jsonl file - do not write scripts to do this
+
+Files to process:
+- svix-server/src/core/types/mod.rs (newtype wrappers: OrganizationId, ApplicationId, etc.)
+- Focus on newtype wrapper definitions
+- Exclude type aliases/enums (those go to Type Aliases Enums agent)
+- Exclude test modules
+
+Code extraction strategy:
+- Extract newtype struct definitions (type wrappers)
+- Extract struct-level attributes and documentation
+- Preserve all imports as context
+
+Task: For each code block you extract, you must:
+
+Analyze the code: Identify the specific newtype wrapper definition or newtype pattern.
+
+Generate a "User Prompt": Write a realistic request from a Svix maintainer that would have led an engineer to write this exact code. It should sound like a GitHub issue, type requirement, or internal request (e.g., "We need a type-safe wrapper for OrganizationId with validation", "Create newtype wrappers for ApplicationId and EndpointId to prevent type mixing", "Implement newtype wrappers that use KSUID for IDs", "Add newtype wrappers that enable type-safe ID handling").
+
+Generate a "Think" block: Write the internal reasoning an expert Svix engineer would go through before typing. Mention Svix-specific traits:
+- Newtype patterns for type safety (OrganizationId, ApplicationId, EndpointId, MessageId)
+- Serialization/deserialization with serde
+- KSUID usage for IDs
+- Performance considerations (avoiding unnecessary allocations)
+
+Format the Output: Return the result as a single-line JSONL object using the ChatML format.
+
+JSONL Schema: {"type":"chatml","messages":[{"role":"system","content":"You are the Svix Maintainer AI, an expert in the internal svix-server Rust architecture, specializing in newtype wrappers for IDs and custom types."},{"role":"user","content":"[IMAGINED USER REQUEST]"},{"role":"assistant","content":"<think>\n[EXPERT REASONING]\n</think>\n\n[THE REAL SVIX CODE BLOCK]"}]}
+
+Rules for Reasoning (<think>):
+- Do not be generic. Mention specific crates: serde, svix-ksuid
+- Explain newtype patterns (e.g., "We use newtype wrappers for IDs to prevent mixing different ID types and enable validation")
+- Mention serialization (e.g., "We derive Serialize and Deserialize for type definitions to enable JSON serialization")
+- Reference KSUID usage (e.g., "We use svix-ksuid for IDs because they're globally unique, sortable, and don't require database round-trips")
+- Explain performance (e.g., "We use Cow<str> for string fields to avoid allocations when converting from owned to borrowed")
+
+Rules for Code:
+- Use the exact code I provide. Do not simplify it.
+- Include complete newtype wrapper definitions
+- Include struct-level attributes
+- Preserve all comments and documentation
+
+Output format: Return ONLY the JSONL line(s). Do not provide any conversational intro.
+
+WORKFLOW:
+1. Read file: mod.rs in svix-server/src/core/types/
+2. Identify all newtype wrapper definitions
+3. Extract each definition with its complete body
+4. Generate training data for each block
+5. Append JSONL line to newtype_wrappers.jsonl
+6. Report total number of examples generated
+
+TARGET: Aim to generate ~15-25 training examples. Extract all newtype wrapper definitions. If you find fewer code blocks, generate examples for all of them. If you find more, prioritize the most important/complex patterns.
+
+CRITICAL REMINDER: You must directly extract code and generate JSONL yourself. Do NOT write Python scripts, automation code, or helper programs. Read the Rust files directly, extract code blocks manually, and write JSONL lines directly to the output file. The extract_code_blocks.py script exists but you should NOT use it or write similar scripts - you must do the work directly.
+
