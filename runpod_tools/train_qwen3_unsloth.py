@@ -10,11 +10,12 @@ import os
 from pathlib import Path
 from typing import Dict, List
 
+from unsloth import FastModel
+
 from datasets import load_dataset
 from huggingface_hub import login
 from transformers import TrainingArguments
 from trl import SFTTrainer
-from unsloth import FastModel
 
 
 LOGGER = logging.getLogger("runpod_finetune")
@@ -56,6 +57,11 @@ def format_chat_dataset(dataset, tokenizer, max_seq_length: int):
 def main() -> None:
     parser = argparse.ArgumentParser(description="Fine-tune Qwen3-1.5B with Unsloth.")
     parser.add_argument("--data", default="finetune-data.jsonl", help="Path to JSONL dataset.")
+    parser.add_argument(
+        "--model",
+        default="unsloth/Qwen3-1.5B",
+        help="Hugging Face model id for Qwen3 1.5B.",
+    )
     parser.add_argument("--output-dir", default="output/qwen3-1.5b-unsloth", help="Output directory.")
     parser.add_argument("--max-seq-length", type=int, default=2048, help="Max sequence length.")
     parser.add_argument("--batch-size", type=int, default=2, help="Per-device batch size.")
@@ -79,10 +85,10 @@ def main() -> None:
     else:
         LOGGER.warning("HF_TOKEN not set; assuming model is publicly accessible.")
 
-    LOGGER.info("Loading model and tokenizer: unsloth/Qwen3-1.5B")
+    LOGGER.info("Loading model and tokenizer: %s", args.model)
     LOGGER.debug("Max seq length: %s", args.max_seq_length)
     model, tokenizer = FastModel.from_pretrained(
-        model_name="unsloth/Qwen3-1.5B",
+        model_name=args.model,
         max_seq_length=args.max_seq_length,
         load_in_4bit=True,
         load_in_8bit=False,
