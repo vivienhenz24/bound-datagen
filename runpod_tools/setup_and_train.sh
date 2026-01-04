@@ -44,3 +44,8 @@ echo "[runpod] Launching training..."
   --save-steps "$SAVE_STEPS" \
   --warmup-steps "$WARMUP_STEPS" \
   --debug
+
+if [[ "${MAKE_TAR:-1}" == "1" ]]; then
+  echo "[runpod] Creating model archive..."
+  tar -czf output/qwen3-1.7b-unsloth.tar.gz output/qwen3-1.7b-unsloth
+fi
