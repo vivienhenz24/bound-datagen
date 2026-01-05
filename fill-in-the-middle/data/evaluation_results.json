@@ -1,0 +1,6 @@
+{
+  "model": "qwen2.5-coder:7b",
+  "exact_match": 0.15605749486652978,
+  "bleu_score": 25.341863695934872,
+  "num_samples": 487
+}
