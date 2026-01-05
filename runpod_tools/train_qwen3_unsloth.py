@@ -134,19 +134,23 @@ def main() -> None:
         args.output_dir = f"output/{model_slug}-{data_slug}"
         print(f"Using automatic output directory: {args.output_dir}")
 
-    # For 8B model, optimize hyperparameters for stability and knowledge preservation
+    # For 8B model, optimize for maximum overfitting on Rosette dataset
     if "8B" in str(args.model):
+        if args.batch_size == 2:
+            args.batch_size = 2
+            print("Setting batch size to 2 for 8B model (fits on RTX 5090).")
+
         if args.grad_accum == 4:
-            args.grad_accum = 8
-            print("Increasing gradient accumulation to 8 for 8B model stability.")
-        
+            args.grad_accum = 1
+            print("Reducing gradient accumulation to 1 for 8B model (more frequent updates).")
+
         if args.learning_rate == 2e-4:
-            args.learning_rate = 5e-5
-            print(f"Adjusted learning rate to {args.learning_rate} for 8B model.")
-            
+            args.learning_rate = 1e-4
+            print(f"Adjusted learning rate to {args.learning_rate} for 8B model to overfit.")
+
         if args.epochs == 1 or args.epochs == 5: # If using default or the common setup default
-            args.epochs = 3
-            print(f"Adjusted epochs to {args.epochs} for 8B model to prevent overfitting.")
+            args.epochs = 10
+            print(f"Adjusted epochs to {args.epochs} for 8B model to maximize overfitting on Rosette dataset.")
 
     # For 1.7B model, optimize for maximum overfitting on Rosette dataset
     if "1.7B" in str(args.model):
