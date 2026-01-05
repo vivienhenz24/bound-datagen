@@ -101,19 +101,27 @@ def main() -> None:
         print("\nChoose model for training:")
         print("1) Qwen/Qwen3-1.7B (default)")
         print("2) Qwen/Qwen3-8B")
-        choice = input("\nEnter choice [1/2, default 1]: ").strip()
-        
+        print("3) Qwen/Qwen3-0.6B")
+        choice = input("\nEnter choice [1/2/3, default 1]: ").strip()
+
         if choice == "2":
             args.model = "Qwen/Qwen3-8B"
+        elif choice == "3":
+            args.model = "Qwen/Qwen3-0.6B"
         else:
             args.model = "Qwen/Qwen3-1.7B"
-        
+
         print(f"Selected model: {args.model}\n")
 
     # Dynamic output directory and hyperparameter adjustment
     # Use model and dataset characteristics to set a better default output path if not explicitly provided
     if args.output_dir == "output/qwen3-1.7b-unsloth":
-        model_slug = "qwen3-8b" if "8B" in str(args.model) else "qwen3-1.7b"
+        if "8B" in str(args.model):
+            model_slug = "qwen3-8b"
+        elif "0.6B" in str(args.model):
+            model_slug = "qwen3-0.6b"
+        else:
+            model_slug = "qwen3-1.7b"
 
         # Determine data slug based on dataset
         if "merged_rosette_final" in str(args.data):
@@ -145,18 +153,36 @@ def main() -> None:
         if args.batch_size == 2:
             args.batch_size = 8
             print("Increasing batch size to 8 for the RTX 5090.")
-        
+
         if args.grad_accum == 4:
             args.grad_accum = 1
             print("Reducing gradient accumulation to 1 for 1.7B model stability.")
-            
+
         if args.learning_rate == 2e-4:
             args.learning_rate = 5e-5
             print(f"Adjusted learning rate to {args.learning_rate} for 1.7B model.")
-            
+
         if args.epochs == 1 or args.epochs == 5: # If using default or the common setup default
             args.epochs = 2
             print(f"Adjusted epochs to {args.epochs} for 1.7B model stability.")
+
+    # For 0.6B model, optimize for fast training with good convergence
+    if "0.6B" in str(args.model):
+        if args.batch_size == 2:
+            args.batch_size = 16
+            print("Increasing batch size to 16 for 0.6B model (fits easily on RTX 5090).")
+
+        if args.grad_accum == 4:
+            args.grad_accum = 1
+            print("Reducing gradient accumulation to 1 for 0.6B model.")
+
+        if args.learning_rate == 2e-4:
+            args.learning_rate = 1e-4
+            print(f"Adjusted learning rate to {args.learning_rate} for 0.6B model.")
+
+        if args.epochs == 1 or args.epochs == 5: # If using default or the common setup default
+            args.epochs = 3
+            print(f"Adjusted epochs to {args.epochs} for 0.6B model (can handle more epochs).")
 
     configure_logging(args.debug)
 

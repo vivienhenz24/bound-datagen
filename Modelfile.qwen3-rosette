@@ -1,0 +1,17 @@
+FROM ./output/qwen3-1.7b-rosette-merged/model.gguf
+
+TEMPLATE """{{- if .System }}
+<|im_start|>system
+{{ .System }}<|im_end|>
+{{ end }}
+<|im_start|>user
+{{ .Prompt }}<|im_end|>
+<|im_start|>assistant
+"""
+
+PARAMETER temperature 0.7
+PARAMETER top_p 0.9
+PARAMETER stop "<|im_start|>"
+PARAMETER stop "<|im_end|>"
+
+SYSTEM """You are the Rosette Maintainer AI, an expert in Rosette DSLs and solver-aided verification/synthesis."""

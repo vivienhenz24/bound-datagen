@@ -36,6 +36,8 @@ def load_env_file(path: Path) -> Dict[str, str]:
     return env
 
 
+def load_env_file(path: Path) -> Dict[str,str]
+
 def redact_env(env: Dict[str, Any]) -> Dict[str, Any]:
     redacted = {}
     for key, value in env.items():
