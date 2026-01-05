@@ -85,13 +85,16 @@ def main() -> None:
         print("\nChoose dataset for training:")
         print("1) finetune-data.jsonl (with reasoning)")
         print("2) finetune-data_no_reasoning.jsonl (removed reasoning)")
-        choice = input("\nEnter choice [1/2, default 1]: ").strip()
-        
+        print("3) datagen/output/merged_rosette_final.jsonl (Rosette/Serval/Ocelot/Cosette/Quivela/Ferrite)")
+        choice = input("\nEnter choice [1/2/3, default 1]: ").strip()
+
         if choice == "2":
             args.data = "finetune-data_no_reasoning.jsonl"
+        elif choice == "3":
+            args.data = "datagen/output/merged_rosette_final.jsonl"
         else:
             args.data = "finetune-data.jsonl"
-        
+
         print(f"Selected dataset: {args.data}")
 
     if args.model is None:
@@ -111,7 +114,15 @@ def main() -> None:
     # Use model and dataset characteristics to set a better default output path if not explicitly provided
     if args.output_dir == "output/qwen3-1.7b-unsloth":
         model_slug = "qwen3-8b" if "8B" in str(args.model) else "qwen3-1.7b"
-        data_slug = "no-think" if "no_reasoning" in str(args.data) else "think"
+
+        # Determine data slug based on dataset
+        if "merged_rosette_final" in str(args.data):
+            data_slug = "rosette"
+        elif "no_reasoning" in str(args.data):
+            data_slug = "no-think"
+        else:
+            data_slug = "think"
+
         args.output_dir = f"output/{model_slug}-{data_slug}"
         print(f"Using automatic output directory: {args.output_dir}")
 

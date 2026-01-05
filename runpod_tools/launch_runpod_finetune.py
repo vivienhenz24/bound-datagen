@@ -465,6 +465,7 @@ def main() -> None:
             f"ssh -p {port} -o StrictHostKeyChecking=no",
             "finetune-data.jsonl",
             "runpod_tools/",
+            "datagen/",
             rsync_target + "/",
         ],
         debug=args.debug,

@@ -2,3 +2,7 @@
 svix = "https://github.com/svix/svix-webhooks"
 rosette = "https://github.com/emina/rosette"
 serval = "https://github.com/uw-unsat/serval"
+ocelot = "https://github.com/jamesbornholt/ocelot"
+cosette = "https://github.com/uwdb/Cosette.git"
+quivela = "https://github.com/jamesbornholt/quivela"
+ferrite = "https://github.com/uwplse/ferrite.git"
