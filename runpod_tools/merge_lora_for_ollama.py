@@ -98,10 +98,11 @@ def main() -> None:
     LOGGER.info("Loading base model in full precision...")
     model = AutoModelForCausalLM.from_pretrained(
         args.base_model,
-        device_map="auto",
+        device_map="cpu",  # Use CPU for merging to save VRAM/GPU RAM on M3
         torch_dtype="auto",
         token=hf_token,
         trust_remote_code=True,
+        low_cpu_mem_usage=True,
     )
     tokenizer = AutoTokenizer.from_pretrained(
         args.base_model,

@@ -162,8 +162,8 @@ async def process_all_prompts(
     Returns:
         List of (prompt_name, success, error_message) tuples
     """
-    # Find all .txt prompt files
-    prompt_files = sorted(prompts_dir.glob("*.txt"))
+    # Find all .txt and .md prompt files
+    prompt_files = sorted(list(prompts_dir.glob("*.txt")) + list(prompts_dir.glob("*.md")))
     
     # Filter to only included prompts if specified
     if include_prompts:

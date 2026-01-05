@@ -1,2 +1,4 @@
 [repositories]
 svix = "https://github.com/svix/svix-webhooks"
+rosette = "https://github.com/emina/rosette"
+serval = "https://github.com/uw-unsat/serval"

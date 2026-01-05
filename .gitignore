@@ -150,6 +150,9 @@ cython_debug/
 output/
 output_3epochs/
 llama.cpp/
+qwn1.7b-nothink/
+qwen8b-nothink/
+qwen8b-think/
 
 
-
+llama.cpp/
