@@ -115,10 +115,19 @@ def main() -> None:
         args.output_dir = f"output/{model_slug}-{data_slug}"
         print(f"Using automatic output directory: {args.output_dir}")
 
-    # For 8B model, increase gradient accumulation steps if still at default to improve stability
-    if "8B" in str(args.model) and args.grad_accum == 4:
-        args.grad_accum = 8
-        print("Increasing gradient accumulation to 8 for 8B model stability.")
+    # For 8B model, optimize hyperparameters for stability and knowledge preservation
+    if "8B" in str(args.model):
+        if args.grad_accum == 4:
+            args.grad_accum = 8
+            print("Increasing gradient accumulation to 8 for 8B model stability.")
+        
+        if args.learning_rate == 2e-4:
+            args.learning_rate = 5e-5
+            print(f"Adjusted learning rate to {args.learning_rate} for 8B model.")
+            
+        if args.epochs == 1 or args.epochs == 5: # If using default or the common setup default
+            args.epochs = 3
+            print(f"Adjusted epochs to {args.epochs} for 8B model to prevent overfitting.")
 
     configure_logging(args.debug)
 
