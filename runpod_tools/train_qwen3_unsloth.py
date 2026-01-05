@@ -56,16 +56,16 @@ def format_chat_dataset(dataset, tokenizer, max_seq_length: int):
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Fine-tune Qwen3 with Unsloth.")
-    parser.add_argument("--data", default="finetune-data.jsonl", help="Path to JSONL dataset.")
+    parser.add_argument("--data", default=None, help="Path to JSONL dataset.")
     parser.add_argument(
         "--model",
-        default="Qwen/Qwen3-1.7B",
+        default=None,
         help="Hugging Face model id for Qwen3.",
     )
     parser.add_argument("--output-dir", default="output/qwen3-1.7b-unsloth", help="Output directory.")
     parser.add_argument("--max-seq-length", type=int, default=2048, help="Max sequence length.")
     parser.add_argument("--batch-size", type=int, default=2, help="Per-device batch size.")
-    parser.add_argument("--grad-accum", type=int, default=8, help="Gradient accumulation steps.")
+    parser.add_argument("--grad-accum", type=int, default=4, help="Gradient accumulation steps (Unsloth default: 4).")
     parser.add_argument("--epochs", type=int, default=1, help="Training epochs.")
     parser.add_argument(
         "--max-steps",
@@ -74,11 +74,51 @@ def main() -> None:
         help="Override total training steps (takes precedence over epochs if > 0).",
     )
     parser.add_argument("--learning-rate", type=float, default=2e-4, help="Learning rate.")
-    parser.add_argument("--logging-steps", type=int, default=10, help="Logging interval in steps.")
-    parser.add_argument("--save-steps", type=int, default=200, help="Checkpoint save interval in steps.")
-    parser.add_argument("--warmup-steps", type=int, default=20, help="Warmup steps.")
+    parser.add_argument("--logging-steps", type=int, default=1, help="Logging interval in steps (Unsloth default: 1).")
+    parser.add_argument("--save-steps", type=int, default=50, help="Checkpoint save interval in steps.")
+    parser.add_argument("--warmup-steps", type=int, default=10, help="Warmup steps (Unsloth default: 10).")
+    parser.add_argument("--warmup-ratio", type=float, default=0.0, help="Warmup ratio if steps not set.")
     parser.add_argument("--debug", action="store_true", help="Enable verbose logging.")
     args = parser.parse_args()
+
+    if args.data is None:
+        print("\nChoose dataset for training:")
+        print("1) finetune-data.jsonl (with reasoning)")
+        print("2) finetune-data_no_reasoning.jsonl (removed reasoning)")
+        choice = input("\nEnter choice [1/2, default 1]: ").strip()
+        
+        if choice == "2":
+            args.data = "finetune-data_no_reasoning.jsonl"
+        else:
+            args.data = "finetune-data.jsonl"
+        
+        print(f"Selected dataset: {args.data}")
+
+    if args.model is None:
+        print("\nChoose model for training:")
+        print("1) Qwen/Qwen3-1.7B (default)")
+        print("2) Qwen/Qwen3-8B")
+        choice = input("\nEnter choice [1/2, default 1]: ").strip()
+        
+        if choice == "2":
+            args.model = "Qwen/Qwen3-8B"
+        else:
+            args.model = "Qwen/Qwen3-1.7B"
+        
+        print(f"Selected model: {args.model}\n")
+
+    # Dynamic output directory and hyperparameter adjustment
+    # Use model and dataset characteristics to set a better default output path if not explicitly provided
+    if args.output_dir == "output/qwen3-1.7b-unsloth":
+        model_slug = "qwen3-8b" if "8B" in str(args.model) else "qwen3-1.7b"
+        data_slug = "no-think" if "no_reasoning" in str(args.data) else "think"
+        args.output_dir = f"output/{model_slug}-{data_slug}"
+        print(f"Using automatic output directory: {args.output_dir}")
+
+    # For 8B model, increase gradient accumulation steps if still at default to improve stability
+    if "8B" in str(args.model) and args.grad_accum == 4:
+        args.grad_accum = 8
+        print("Increasing gradient accumulation to 8 for 8B model stability.")
 
     configure_logging(args.debug)
 
@@ -134,6 +174,10 @@ def main() -> None:
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
+    # Use warmup_steps if provided, otherwise use warmup_ratio
+    warmup_steps = args.warmup_steps if args.warmup_steps > 0 else 0
+    warmup_ratio = args.warmup_ratio if warmup_steps == 0 else 0.0
+
     training_args = TrainingArguments(
         output_dir=str(output_dir),
         per_device_train_batch_size=args.batch_size,
@@ -147,10 +191,12 @@ def main() -> None:
         bf16=True,
         fp16=False,
         optim="adamw_8bit",
-        warmup_steps=args.warmup_steps,
+        warmup_steps=warmup_steps,
+        warmup_ratio=warmup_ratio,
         weight_decay=0.01,
         lr_scheduler_type="linear",
         report_to=[],
+        seed=3407,  # Unsloth default seed for reproducibility
     )
 
     trainer = SFTTrainer(

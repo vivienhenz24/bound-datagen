@@ -28,11 +28,12 @@ echo "[runpod] Verifying GPU availability..."
 nvidia-smi || true
 nvidia-smi -L || true
 
-EPOCHS="${EPOCHS:-3}"
+EPOCHS="${EPOCHS:-5}"
 MAX_STEPS="${MAX_STEPS:-0}"
-LOGGING_STEPS="${LOGGING_STEPS:-10}"
-SAVE_STEPS="${SAVE_STEPS:-200}"
-WARMUP_STEPS="${WARMUP_STEPS:-20}"
+LOGGING_STEPS="${LOGGING_STEPS:-5}"
+SAVE_STEPS="${SAVE_STEPS:-50}"
+WARMUP_STEPS="${WARMUP_STEPS:-0}"
+WARMUP_RATIO="${WARMUP_RATIO:-0.03}"
 
 echo "[runpod] Launching training..."
 "$PYTHON_BIN" runpod_tools/train_qwen3_unsloth.py \
@@ -43,6 +44,7 @@ echo "[runpod] Launching training..."
   --logging-steps "$LOGGING_STEPS" \
   --save-steps "$SAVE_STEPS" \
   --warmup-steps "$WARMUP_STEPS" \
+  --warmup-ratio "$WARMUP_RATIO" \
   --debug
 
 if [[ "${MAKE_TAR:-1}" == "1" ]]; then

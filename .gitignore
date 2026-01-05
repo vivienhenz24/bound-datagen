@@ -148,8 +148,8 @@ cython_debug/
 
 # Model outputs
 output/
-
-
+output_3epochs/
+llama.cpp/
 
 
 
