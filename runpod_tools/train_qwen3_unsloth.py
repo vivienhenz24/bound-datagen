@@ -148,23 +148,23 @@ def main() -> None:
             args.epochs = 3
             print(f"Adjusted epochs to {args.epochs} for 8B model to prevent overfitting.")
 
-    # For 1.7B model, optimize to prevent "catastrophic forgetting" and looping
+    # For 1.7B model, optimize for maximum overfitting on Rosette dataset
     if "1.7B" in str(args.model):
         if args.batch_size == 2:
-            args.batch_size = 8
-            print("Increasing batch size to 8 for the RTX 5090.")
+            args.batch_size = 4
+            print("Setting batch size to 4 for 1.7B model (allows more gradient updates).")
 
         if args.grad_accum == 4:
             args.grad_accum = 1
-            print("Reducing gradient accumulation to 1 for 1.7B model stability.")
+            print("Reducing gradient accumulation to 1 for 1.7B model (more frequent updates).")
 
         if args.learning_rate == 2e-4:
-            args.learning_rate = 5e-5
-            print(f"Adjusted learning rate to {args.learning_rate} for 1.7B model.")
+            args.learning_rate = 2e-4
+            print(f"Using higher learning rate {args.learning_rate} for 1.7B model to overfit.")
 
         if args.epochs == 1 or args.epochs == 5: # If using default or the common setup default
-            args.epochs = 2
-            print(f"Adjusted epochs to {args.epochs} for 1.7B model stability.")
+            args.epochs = 10
+            print(f"Adjusted epochs to {args.epochs} for 1.7B model to maximize overfitting on Rosette dataset.")
 
     # For 0.6B model, optimize for fast training with good convergence
     if "0.6B" in str(args.model):
