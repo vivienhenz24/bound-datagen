@@ -3,8 +3,10 @@ set -euo pipefail
 set -x
 
 echo "[runpod] Starting setup..."
+# Ensure we are in the repository root
+cd "$(dirname "$0")/.."
+echo "[runpod] Working directory: $(pwd)"
 date
-pwd
 
 if ! command -v uv >/dev/null 2>&1; then
   echo "[runpod] Installing uv..."
