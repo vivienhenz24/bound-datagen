@@ -148,6 +148,7 @@ cython_debug/
 
 # Model outputs
 output/
+!datagen/output/
 output_3epochs/
 llama.cpp/
 qwn1.7b-nothink/
